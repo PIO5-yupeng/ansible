@@ -1,0 +1,15 @@
+---
+- hosts: TSRV
+  ignore_unreachable: true
+  gather_facts: false
+
+  tasks:
+    - name: Show Power_TSRV
+      raw: "show platform"
+      register: result_power
+
+    - name: Get the results
+      debug:
+        var: results
+      vars:
+        results: "{{ result_power.stdout_lines | select('match', '.*ASR.*|.*ISR.*|.*NXA.*') | list }}"

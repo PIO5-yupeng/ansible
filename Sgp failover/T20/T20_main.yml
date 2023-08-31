@@ -1,0 +1,31 @@
+---
+- name: main
+  hosts: all
+  ignore_unreachable: true
+  gather_facts: false
+
+  tasks:
+    - name: Show Power (nxos)
+      raw: "show env power"
+      when: inventory_hostname in groups['nxos']
+      register: result_leaf
+
+    - name: Show Power_TSRV (TSRV)
+      raw: "show platform"
+      when: inventory_hostname in groups['TSRV']
+      register: result_power
+
+    - name: Get the results
+      debug:
+        var: results
+      vars:
+        results: >-
+          {{
+            result_leaf.stdout_lines
+            | select('match', '.*PWR.*|.*Built.*|.*NXA.*')
+            | list
+            if inventory_hostname in groups['nxos']
+            else result_power.stdout_lines
+                 | select('match', '.*ASR.*|.*ISR.*|.*NXA.*')
+                 | list
+          }}

@@ -1,0 +1,15 @@
+---
+- hosts: nxos
+  ignore_unreachable: true
+  gather_facts: false
+
+  tasks:
+    - name: Show Power
+      raw: "show env power"
+      register: result_power
+
+    - name: Get the results
+      debug:
+        var: results
+      vars:
+        results: "{{ result_power.stdout_lines | select('match', '.*PWR.*|.*Built.*|.*NXA.*') | list }}"
